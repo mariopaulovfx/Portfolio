@@ -9,8 +9,8 @@
   <script>
     // Dark is the default theme; apply a saved "light" choice before first paint to avoid a flash.
     try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
-    // Section entrance animations need IntersectionObserver; without it (or with reduced motion) content just shows.
-    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Section entrance animations need IntersectionObserver; without it content just shows.
+    if ('IntersectionObserver' in window) {
       document.documentElement.classList.add('reveal-ready');
     }
   </script>
@@ -52,9 +52,6 @@
     }
     /* Smooth scroll for in-page links (#trabajos, #clientes, #contacto) */
     html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-    }
     body {
       margin: 0;
       background-color: var(--background);
@@ -98,10 +95,6 @@
       .reels-track .reel-card { flex-basis: calc((100cqw - 72px) / 4); margin-right: 24px; }
     }
     @keyframes reels-scroll { to { transform: translateX(-50%); } }
-    @media (prefers-reduced-motion: reduce) {
-      .reels-viewport { overflow-x: auto; }
-      .reels-track { animation: none; }
-    }
     /* ---------- Light theme (html.light). Dark stays the default. ----------
        The hero keeps its blue video backdrop; everything below it turns light. */
     html.light { --background: #f5f5f3; --foreground: #111; }
@@ -148,17 +141,12 @@
     /* Reel play buttons (positioned with Tailwind's translate, so scale through its variables) */
     .reel-overlay span { transition: transform .2s ease; }
     .reel:hover .reel-overlay span { --tw-scale-x: 1.12; --tw-scale-y: 1.12; }
-    @media (prefers-reduced-motion: reduce) {
-      header button:hover, a.rounded-full:hover { scale: 1; }
-      .reel:hover .reel-overlay span { --tw-scale-x: 1; --tw-scale-y: 1; }
-    }
     /* SCROLL hint: arrow bounces downward to invite scrolling */
     .scroll-arrow { animation: scroll-bounce 1.4s cubic-bezier(.5, 0, .5, 1) infinite; }
     @keyframes scroll-bounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(7px); }
     }
-    @media (prefers-reduced-motion: reduce) { .scroll-arrow { animation: none; } }
     /* Section entrance: fade + rise the first time each block enters the viewport, then it stays */
     html.reveal-ready [data-reveal] {
       opacity: 0;
@@ -212,14 +200,14 @@
   <!-- HERO -->
   <section class="relative md:h-[850px] overflow-hidden bg-black pb-14 md:pb-0">
     <!-- background video (blurred + darkened so it doesn't compete with the content) -->
-    <div class="absolute inset-x-0 top-0 h-[700px] overflow-hidden bg-[#050505]">
+    <div class="absolute inset-x-0 top-0 bottom-0 md:bottom-auto md:h-[700px] overflow-hidden bg-[#050505]">
       <video class="hero-bg absolute inset-0 w-full h-full object-cover" src="BACKGROUND/hero-bg.mp4" poster="BACKGROUND/hero-bg.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
       <div class="absolute inset-0 bg-black/50"></div>
     </div>
     <div class="absolute inset-0 dots pointer-events-none"></div>
     <!-- bottom fade to black -->
-    <div class="hero-fade absolute inset-x-0 top-[540px] h-[140px] bg-gradient-to-b from-transparent to-black"></div>
-    <div class="absolute inset-x-0 top-[680px] bottom-0 bg-black"></div>
+    <div class="hero-fade absolute inset-x-0 bottom-0 h-[220px] md:bottom-auto md:top-[540px] md:h-[140px] bg-gradient-to-b from-transparent to-black"></div>
+    <div class="hidden md:block absolute inset-x-0 top-[680px] bottom-0 bg-black"></div>
 
     <!-- content -->
     <div data-reveal class="relative z-10 flex flex-col items-center text-center px-4 pt-[170px] md:pt-[258px]">
@@ -671,7 +659,7 @@
 
     // When a button grows on hover, nudge the buttons next to it so they keep their spacing.
     const HOVER_SCALE = 1.07;
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    {
       document.querySelectorAll('header button, a.rounded-full').forEach((btn) => {
         const siblings = [...btn.parentElement.children].filter((el) => el.matches('button, a.rounded-full'));
         if (siblings.length < 2) return;
@@ -686,9 +674,15 @@
       });
     }
 
-    // Hero background video: with reduced motion, keep the still poster instead of playing.
+    // Hero background video: make sure it plays. Some phones block autoplay (e.g. iPhone Low Power Mode);
+    // in that case start it on the visitor's first touch, click or scroll.
     const heroBg = document.querySelector('.hero-bg');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { heroBg.removeAttribute('autoplay'); heroBg.pause(); }
+    heroBg.muted = true;
+    const playHeroBg = () => heroBg.play().catch(() => {});
+    playHeroBg();
+    ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach((evt) =>
+      window.addEventListener(evt, () => { if (heroBg.paused) playHeroBg(); }, { passive: true, once: true }));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && heroBg.paused) playHeroBg(); });
 
     // Success story: months working together, counted from the start date.
     document.querySelectorAll('[data-months-since]').forEach((el) => {
@@ -762,6 +756,36 @@
       }, { threshold: 0.5 });
       counters.forEach((el) => countObserver.observe(el));
     }
+
+    // In-page links (#trabajos, #clientes, #contacto, logo → top): animated scroll that works on every browser.
+    const smoothScrollTo = (targetY, duration = 900) => {
+      const startY = window.scrollY;
+      const dist = targetY - startY;
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      let start = null;
+      const root = document.documentElement;
+      const prev = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto'; // we animate ourselves
+      const step = (now) => {
+        if (start === null) start = now;
+        const t = Math.min((now - start) / duration, 1);
+        window.scrollTo(0, startY + dist * ease(t));
+        if (t < 1) requestAnimationFrame(step); else root.style.scrollBehavior = prev;
+      };
+      requestAnimationFrame(step);
+    };
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href').slice(1);
+        const target = id ? document.getElementById(id) : null;
+        if (id && !target) return;
+        e.preventDefault();
+        const y = target ? target.getBoundingClientRect().top + window.scrollY : 0;
+        const maxY = document.documentElement.scrollHeight - window.innerHeight;
+        smoothScrollTo(Math.min(Math.max(y, 0), maxY));
+        history.replaceState(null, '', id ? `#${id}` : location.pathname);
+      });
+    });
 
     // Theme toggle: dark (default) ⇄ light.
     const themeToggle = document.getElementById('theme-toggle');
