@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mario Paulo</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <script>
+    // Dark is the default theme; apply a saved "light" choice before first paint to avoid a flash.
+    try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+    // Section entrance animations need IntersectionObserver; without it (or with reduced motion) content just shows.
+    if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-ready');
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#000',
+            foreground: '#f5f5f5',
+            surface: '#0d0d0d',
+            'surface-alt': '#181818',
+            accent: '#22c55e',
+            'accent-light': '#4ade80',
+            muted: '#777',
+          },
+          fontFamily: {
+            sf: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+          },
+          maxWidth: { '6xl': '72rem' },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --background: #000;
+      --foreground: #f5f5f5;
+      --surface: #0d0d0d;
+      --surface-alt: #181818;
+      --accent: #22c55e;
+      --accent-light: #4ade80;
+      --muted: #777;
+      --border: #ffffff0f;
+      --glass-bg: #080808cc;
+      --glass-border: #ffffff12;
+      --font-sf-pro: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    }
+    /* Smooth scroll for in-page links (#trabajos, #clientes, #contacto) */
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    body {
+      margin: 0;
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: var(--font-sf-pro);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+      transition: background-color .35s, color .35s;
+    }
+    .text-grad {
+      background: linear-gradient(90deg, #16a34a 0%, #22c55e 55%, #86efac 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      /* extra room so the gradient isn't clipped on the last letter (negative tracking)
+         or on descenders like "g" (tight line-height); negative margins keep the layout unchanged */
+      padding-right: 0.08em;
+      margin-right: -0.08em;
+      padding-bottom: 0.15em;
+      margin-bottom: -0.15em;
+    }
+    /* Reels carousel: 4 cards visible (2 on small screens), infinite scroll to the left.
+       The track holds the cards twice, so translating it by -50% loops seamlessly. */
+    .reels-viewport {
+      container-type: inline-size;
+      overflow: hidden;
+      /* fade the cards out at both edges instead of a hard crop */
+      --reels-fade: min(96px, 10%);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--reels-fade), #000 calc(100% - var(--reels-fade)), transparent);
+      mask-image: linear-gradient(to right, transparent, #000 var(--reels-fade), #000 calc(100% - var(--reels-fade)), transparent);
+    }
+    .reels-track { display: flex; width: max-content; animation: reels-scroll 36s linear infinite; }
+    .reels-viewport:hover .reels-track,
+    .reels-viewport.is-playing .reels-track { animation-play-state: paused; }
+    .reels-track .reel-card { flex: 0 0 calc((100cqw - 16px) / 2); margin-right: 16px; }
+    @media (min-width: 1024px) {
+      .reels-track .reel-card { flex-basis: calc((100cqw - 72px) / 4); margin-right: 24px; }
+    }
+    @keyframes reels-scroll { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .reels-viewport { overflow-x: auto; }
+      .reels-track { animation: none; }
+    }
+    /* ---------- Light theme (html.light). Dark stays the default. ----------
+       The hero keeps its blue video backdrop; everything below it turns light. */
+    html.light { --background: #f5f5f3; --foreground: #111; }
+    html.light .bg-black:not(.reel) { background-color: #f5f5f3; }
+    html.light .bg-surface { background-color: #ebebe9; }
+    html.light .hero-fade { --tw-gradient-to: #f5f5f3; }
+    html.light .text-accent { color: #15803d; }
+    html.light .text-muted { color: #666; }
+    html.light .text-\[\#888\] { color: #5c5c5c; }
+    html.light .text-\[\#999\] { color: #555; }
+    html.light .text-\[\#a0a8a3\] { color: #6b736e; }
+    html.light section:not(:first-of-type) .border-white\/10,
+    html.light section:not(:first-of-type) .border-white\/15,
+    html.light footer .border-white\/15 { border-color: rgb(0 0 0 / 0.1); }
+    html.light .border-white\/\[0\.06\] { border-color: rgb(0 0 0 / 0.08); }
+    html.light .text-grad:not(h1 *) { background-image: linear-gradient(90deg, #15803d 0%, #16a34a 55%, #22c55e 100%); }
+    /* nav: light glass */
+    html.light header nav { background-color: rgb(255 255 255 / 0.75); border-color: rgb(0 0 0 / 0.1); box-shadow: 0 4px 20px rgb(0 0 0 / 0.08); }
+    html.light header .text-white { color: #111; }
+    html.light header .text-white\/40 { color: #666; }
+    html.light header .hover\:text-white:hover { color: #111; }
+    html.light #lang-toggle, html.light #theme-toggle { background-color: rgb(0 0 0 / 0.05); border-color: rgb(0 0 0 / 0.12); color: #111; }
+    html.light #lang-toggle:hover, html.light #theme-toggle:hover { background-color: rgb(0 0 0 / 0.1); }
+    /* hero: SCROLL hint sits on the light area */
+    html.light .text-white\/50 { color: #777; }
+    /* cards */
+    html.light .reel-card { background-color: #fff; box-shadow: 0 8px 24px rgb(0 0 0 / 0.06); }
+    html.light .from-\[\#1c1c1c\] { background-image: linear-gradient(to bottom right, #fff, #fafafa); box-shadow: 0 8px 24px rgb(0 0 0 / 0.06); }
+    html.light .from-\[\#1c2b22\], html.light .from-\[\#1d241f\] { background-image: linear-gradient(to bottom right, #eaf6ee, #f7faf8); }
+    html.light .bg-\[\#121a15\]\/80 { background-color: #fff; box-shadow: 0 8px 20px rgb(0 0 0 / 0.06); }
+    /* glows */
+    html.light .bg-\[radial-gradient\(closest-side\2c rgba\(20\2c 80\2c 40\2c 0\.35\)\2c transparent\)\],
+    html.light .cta-glow { background-image: radial-gradient(closest-side, rgba(34,197,94,0.2), rgba(34,197,94,0.06) 55%, transparent); }
+    html.light .section-fade { --tw-gradient-to: #f5f5f3; }
+    /* CTA + footer text that is white in dark mode */
+    html.light section:last-of-type .text-white:not(a),
+    html.light footer .text-white { color: #111; }
+    html.light footer .bg-white\/5 { background-color: #fff; }
+    /* Buttons grow slightly on hover and return to their size when the cursor leaves */
+    header button, a.rounded-full {
+      transition: scale .2s ease, translate .2s ease, background-color .2s, border-color .2s, color .2s;
+    }
+    header button:hover, a.rounded-full:hover { scale: 1.07; }
+    /* Reel play buttons (positioned with Tailwind's translate, so scale through its variables) */
+    .reel-overlay span { transition: transform .2s ease; }
+    .reel:hover .reel-overlay span { --tw-scale-x: 1.12; --tw-scale-y: 1.12; }
+    @media (prefers-reduced-motion: reduce) {
+      header button:hover, a.rounded-full:hover { scale: 1; }
+      .reel:hover .reel-overlay span { --tw-scale-x: 1; --tw-scale-y: 1; }
+    }
+    /* SCROLL hint: arrow bounces downward to invite scrolling */
+    .scroll-arrow { animation: scroll-bounce 1.4s cubic-bezier(.5, 0, .5, 1) infinite; }
+    @keyframes scroll-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(7px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .scroll-arrow { animation: none; } }
+    /* Section entrance: fade + rise the first time each block enters the viewport, then it stays */
+    html.reveal-ready [data-reveal] {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    html.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+    /* Text selection: green highlight with white text (also over gradient text) */
+    ::selection { background-color: #22c55e; color: #fff; -webkit-text-fill-color: #fff; }
+    /* Hero background video: heavy blur; scaled up so the blurred edges stay off-screen */
+    .hero-bg { filter: blur(14px) saturate(1.1); transform: scale(1.1); }
+    /* CTA spotlight */
+    .cta-glow { background-image: radial-gradient(closest-side, rgba(34,197,94,0.16), rgba(10,70,30,0.22) 45%, transparent); }
+    .theme-icon-moon { display: none; }
+    html.light .theme-icon-sun { display: none; }
+    html.light .theme-icon-moon { display: block; }
+    .dots {
+      background-image: radial-gradient(rgba(0, 0, 0, .55) 1px, transparent 1.4px);
+      background-size: 4px 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="fixed top-[18px] left-1/2 -translate-x-1/2 z-50 w-[calc(100%-32px)] max-w-[820px]">
+    <nav class="h-[52px] flex items-center justify-between rounded-full border border-white/20 bg-white/[0.06] backdrop-blur-md pl-4 pr-4 shadow-[0_0_20px_rgba(120,140,255,0.15)]">
+      <a href="#" class="text-[18px] font-bold tracking-[-0.05em] leading-none"><span class="text-white">MARIO</span> <span class="text-accent">PAULO</span></a>
+      <div class="hidden md:flex items-center gap-6 text-[14px] text-white/40">
+        <a href="#trabajos" class="hover:text-white">Trabajos</a>
+        <a href="#clientes" class="hover:text-white">Clientes</a>
+        <a href="#contacto" class="hover:text-white">Contacto</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="lang-toggle" type="button" aria-label="Switch to English" class="h-7 px-3 rounded-full bg-white/15 border border-white/20 text-[12px] font-semibold text-white/90 hover:bg-white/25 transition-colors">English</button>
+        <button id="theme-toggle" type="button" class="w-[34px] h-[34px] rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors" aria-label="Tema" aria-pressed="false">
+          <svg class="theme-icon-sun w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="theme-icon-moon w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <a href="#contacto" class="h-9 px-5 rounded-full flex items-center text-[14px] font-semibold text-white bg-gradient-to-r from-[#2f9e5a] to-[#2a7d4c] border border-[#4ade80]/40 shadow-[0_0_14px_rgba(34,197,94,0.35)]">Trabajemos juntos</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative h-[850px] overflow-hidden bg-black">
+    <!-- background video (blurred + darkened so it doesn't compete with the content) -->
+    <div class="absolute inset-x-0 top-0 h-[700px] overflow-hidden bg-[#050505]">
+      <video class="hero-bg absolute inset-0 w-full h-full object-cover" src="BACKGROUND/hero-bg.mp4" poster="BACKGROUND/hero-bg.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+      <div class="absolute inset-0 bg-black/50"></div>
+    </div>
+    <div class="absolute inset-0 dots pointer-events-none"></div>
+    <!-- bottom fade to black -->
+    <div class="hero-fade absolute inset-x-0 top-[540px] h-[140px] bg-gradient-to-b from-transparent to-black"></div>
+    <div class="absolute inset-x-0 top-[680px] bottom-0 bg-black"></div>
+
+    <!-- content -->
+    <div data-reveal class="relative z-10 flex flex-col items-center text-center pt-[258px]">
+      <h1 class="text-[150px] font-bold leading-none tracking-[-0.045em]"><span class="text-white">MARIO</span> <span class="text-grad">PAULO</span></h1>
+      <p class="mt-[36px] text-[31px] font-semibold tracking-[0.18em] text-[#a0a0a0]/90 leading-none">EDITOR DE VÍDEO</p>
+      <p class="mt-[37px] max-w-[640px] text-[16px] leading-[27px] text-[#b0b0b0]">Trabajando con creadores y empresarios que quieren escalar su contenido orgánico en redes sociales. Más de 5 años en el sector y más de 50M de vistas generadas.</p>
+      <div class="mt-[38px] flex gap-3">
+        <a href="#trabajos" class="h-[47px] px-7 rounded-full flex items-center text-[14px] font-semibold text-white bg-[#0b3a1e] border-2 border-[#1f9d4f] shadow-[0_0_18px_rgba(34,197,94,0.45)]">Ver trabajos</a>
+        <a href="#contacto" class="h-[47px] px-7 rounded-full flex items-center text-[14px] font-semibold text-white bg-[#241c28] border-2 border-white/20">Trabaja conmigo</a>
+      </div>
+      <div class="mt-[98px] flex flex-col items-center gap-2">
+        <span class="text-[10px] tracking-[0.3em] text-white/50">SCROLL</span>
+        <svg class="scroll-arrow w-3 h-3 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="trabajos" class="bg-black px-4 pt-[108px] pb-[131px]">
+    <div class="max-w-6xl mx-auto">
+      <div data-reveal class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div>
+          <p class="text-[10px] font-bold tracking-[0.25em] text-accent">PORTAFOLIO</p>
+          <h2 class="mt-[30px] text-[60px] font-bold tracking-[-0.05em] leading-none">Mis mejores vídeos</h2>
+        </div>
+        <p class="max-w-[380px] md:text-right text-[14px] leading-[22.5px] text-muted">Trabajos reales con los líderes de cada sector. Cada vídeo está pensado para maximizar retención, conectar con la audiencia y hacer crecer el canal.</p>
+      </div>
+
+      <div data-reveal style="--reveal-delay: 150ms" class="reels-viewport mt-[74px]">
+        <div class="reels-track">
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-1.mp4" poster="videos/reel-1.jpg" title="Función Secreta de Gemini" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">HERRAMIENTAS DE IA</span>
+                <span class="text-muted tracking-wide">Manuel de León</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">Función Secreta de Gemini</h3>
+            </div>
+          </div>
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-2.mp4" poster="videos/reel-2.jpg" title="Haz videos sin salir en cámara" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">HERRAMIENTAS DE IA</span>
+                <span class="text-muted tracking-wide">Manuel de León</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">Haz videos sin salir en cámara</h3>
+            </div>
+          </div>
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-3.mp4" poster="videos/reel-3.jpg" title="3 Errores Como Editor de Video" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">EDICIÓN DE VIDEO</span>
+                <span class="text-muted tracking-wide">Marc O Editor</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">3 Errores Como Editor de Video</h3>
+            </div>
+          </div>
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-4.mp4" poster="videos/reel-4.jpg" title="3 Efectos Premium de Premiere" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">EDICIÓN DE VIDEO</span>
+                <span class="text-muted tracking-wide">Marc O Editor</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">3 Efectos Premium de Premiere</h3>
+            </div>
+          </div>
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-5.mp4" poster="videos/reel-5.jpg" title="Combo de Fragmentos" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">FC MOBILE</span>
+                <span class="text-muted tracking-wide">Mario Poru</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">Combo de Fragmentos</h3>
+            </div>
+          </div>
+          <div class="reel-card rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0f0f0f]">
+            <div class="reel relative aspect-[9/16] overflow-hidden bg-black cursor-pointer" role="button" tabindex="0" aria-label="Reproducir vídeo">
+              <video src="videos/reel-6.mp4" poster="videos/reel-6.jpg" title="Top 5 Mejores Porteros" preload="metadata" playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+              <div class="reel-overlay absolute inset-0 pointer-events-none transition-opacity duration-300">
+                <div class="absolute inset-0 bg-black/20"></div>
+                <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
+              </div>
+            </div>
+            <div class="px-5 pt-[22px] pb-[14px]">
+              <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
+                <span class="font-bold tracking-[0.15em] text-accent">FC MOBILE</span>
+                <span class="text-muted tracking-wide">Mario Poru</span>
+              </div>
+              <h3 class="mt-[14px] text-[16px] font-semibold leading-tight">Top 5 Mejores Porteros</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="clientes" class="bg-surface px-4 pt-[126px] pb-[128px]">
+    <div class="max-w-6xl mx-auto">
+      <div data-reveal class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div>
+          <p class="text-[10px] font-bold tracking-[0.25em] text-accent">CON QUIÉN TRABAJO</p>
+          <h2 class="mt-[30px] text-[60px] font-bold tracking-[-0.05em] leading-none">Clientes</h2>
+        </div>
+        <p class="max-w-[440px] md:text-right text-[14px] leading-[22.5px] text-muted">Trabajo con creadores de contenido y empresarios que quieren llevar su presencia en Redes Sociales al siguiente nivel.</p>
+      </div>
+
+      <div data-reveal-stagger class="mt-[75px] grid grid-cols-1 md:grid-cols-3 gap-x-5 gap-y-[23px]">
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Prime%20Editors.jpg" alt="Prime Editors" loading="lazy" class="w-full h-full object-cover" /></span>
+            <span class="mt-0.5 inline-flex items-center gap-1 h-[22px] px-2.5 rounded-full border border-accent/60 bg-accent/15 text-[9px] font-bold tracking-[0.12em] text-accent-light">★ PARTNER</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">ESCUELA DE EDICIÓN · SKOOL</p>
+          <h3 class="mt-[7px] text-[18px] font-semibold leading-tight">Prime Editors</h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Me formé en Prime Editors, una academia privada de editores de alto nivel especializada en trabajar con clientes high ticket.</p>
+        </div>
+
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Jorge%20Serratos.jpg" alt="Jorge Serratos" loading="lazy" class="w-full h-full object-cover" /></span>
+            <span class="mt-1 flex items-center gap-1.5 text-[14px] font-semibold"><svg class="w-3 h-3 text-[#888]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>1.5M</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">AUTOR Y CONFERENCISTA · INSTAGRAM</p>
+          <h3 class="mt-[7px] flex items-center gap-1.5 text-[18px] font-semibold leading-tight">Jorge Serratos <svg class="verified-badge w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path fill="#fff" d="M10.54 16.2l-3.6-3.6 1.42-1.41 2.18 2.19 5.04-5.04 1.42 1.41z"/></svg></h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Autor best seller, empresario y conferencista internacional. Creador de la filosofía 1+1=3 y del podcast Sinergéticos.</p>
+          <a href="https://www.instagram.com/jorgeserratosf/" target="_blank" rel="noopener noreferrer" class="mt-[16px] inline-flex items-center gap-1.5 text-[14px] font-medium text-accent">Ver perfil <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></a>
+        </div>
+
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Manuel%20de%20Le%C3%B3n.jpg" alt="Manuel de León" loading="lazy" class="block max-w-none" style="width: 250%; height: 250%; margin-left: -57.5%; margin-top: -15%;" /></span>
+            <span class="mt-1 flex items-center gap-1.5 text-[14px] font-semibold"><svg class="w-3 h-3 text-[#888]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>522K</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">NEGOCIOS E IA · INSTAGRAM</p>
+          <h3 class="mt-[7px] flex items-center gap-1.5 text-[18px] font-semibold leading-tight">Manuel de León <svg class="verified-badge w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path fill="#fff" d="M10.54 16.2l-3.6-3.6 1.42-1.41 2.18 2.19 5.04-5.04 1.42 1.41z"/></svg></h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Enseña a emprendedores a hacer más dinero y trabajar menos, impulsando sus negocios con inteligencia artificial.</p>
+          <a href="https://www.instagram.com/manueldeleonmjr/" target="_blank" rel="noopener noreferrer" class="mt-[16px] inline-flex items-center gap-1.5 text-[14px] font-medium text-accent">Ver perfil <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></a>
+        </div>
+
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Nester%20Contreras.jpg" alt="Nester Contreras" loading="lazy" class="w-full h-full object-cover" style="transform: scale(1.5); transform-origin: 50% 30%;" /></span>
+            <span class="mt-1 flex items-center gap-1.5 text-[14px] font-semibold"><svg class="w-3 h-3 text-[#888]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>96.8K</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">LIDERAZGO Y FE · INSTAGRAM</p>
+          <h3 class="mt-[7px] flex items-center gap-1.5 text-[18px] font-semibold leading-tight">Nester Contreras <svg class="verified-badge w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path fill="#fff" d="M10.54 16.2l-3.6-3.6 1.42-1.41 2.18 2.19 5.04-5.04 1.42 1.41z"/></svg></h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Escritor bestseller y educador. Comparte fe, liderazgo e ideas de negocio para crecer sin alejarse de Dios.</p>
+          <a href="https://www.instagram.com/contrerasnester/" target="_blank" rel="noopener noreferrer" class="mt-[16px] inline-flex items-center gap-1.5 text-[14px] font-medium text-accent">Ver perfil <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></a>
+        </div>
+
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Tito%20Luzardo.jpg" alt="Tito Luzardo" loading="lazy" class="w-full h-full object-cover" /></span>
+            <span class="mt-1 flex items-center gap-1.5 text-[14px] font-semibold"><svg class="w-3 h-3 text-[#888]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>763K</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">PEAK PERFORMANCE COACH · INSTAGRAM</p>
+          <h3 class="mt-[7px] flex items-center gap-1.5 text-[18px] font-semibold leading-tight">Tito Luzardo <svg class="verified-badge w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path fill="#fff" d="M10.54 16.2l-3.6-3.6 1.42-1.41 2.18 2.19 5.04-5.04 1.42 1.41z"/></svg></h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Empresario, papá y esposo que salió de varias quiebras. Hoy ayuda a líderes a tomar decisiones difíciles.</p>
+          <a href="https://www.instagram.com/titoluzardo/" target="_blank" rel="noopener noreferrer" class="mt-[16px] inline-flex items-center gap-1.5 text-[14px] font-medium text-accent">Ver perfil <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></a>
+        </div>
+
+        <div class="rounded-2xl border-2 border-white/10 bg-gradient-to-br from-[#1c1c1c] to-[#181818] p-6 min-h-[294px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+          <div class="flex justify-between items-start">
+            <span class="block w-[62px] h-[62px] rounded-full overflow-hidden border-2 border-white/15"><img src="CLIENTES/Tony%20Cocchiola.jpg" alt="Tony Cocchiola" loading="lazy" class="w-full h-full object-cover" /></span>
+            <span class="mt-1 flex items-center gap-1.5 text-[14px] font-semibold"><svg class="w-3 h-3 text-[#888]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>136K</span>
+          </div>
+          <p class="mt-[20px] text-[10px] font-bold tracking-[0.2em] text-accent">EMPRESARIO · INSTAGRAM</p>
+          <h3 class="mt-[7px] flex items-center gap-1.5 text-[18px] font-semibold leading-tight">Tony Cocchiola <svg class="verified-badge w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada"><path fill="#1d9bf0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.26 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/><path fill="#fff" d="M10.54 16.2l-3.6-3.6 1.42-1.41 2.18 2.19 5.04-5.04 1.42 1.41z"/></svg></h3>
+          <p class="mt-[8px] text-[14px] leading-[23px] text-[#888]">Fundador de IMECA. Empresario y coach que comparte su historia de reinvención en conferencias, mentorías y entrevistas.</p>
+          <a href="https://www.instagram.com/tonycocchiola/" target="_blank" rel="noopener noreferrer" class="mt-[16px] inline-flex items-center gap-1.5 text-[14px] font-medium text-accent">Ver perfil <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CASO DE ÉXITO -->
+  <section class="relative bg-surface px-4 pt-[128px] pb-[130px] overflow-hidden">
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[800px] rounded-full bg-[radial-gradient(closest-side,rgba(20,80,40,0.35),transparent)] pointer-events-none"></div>
+    <!-- fade into the CTA below so there's no visible seam -->
+    <div class="section-fade absolute inset-x-0 bottom-0 h-[220px] bg-gradient-to-b from-transparent to-black pointer-events-none"></div>
+    <div class="relative max-w-6xl mx-auto flex flex-col md:flex-row md:items-center gap-16">
+      <img data-reveal src="CLIENTES/Manuel%20de%20Le%C3%B3n.jpg" alt="Manuel de León" class="w-full md:w-[380px] h-[522px] object-cover object-[48%_50%] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]" />
+      <div data-reveal style="--reveal-delay: 150ms" class="flex-1">
+        <p class="flex items-center gap-2 text-[10px] font-bold tracking-[0.25em] text-accent"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg>CASO DE ÉXITO</p>
+        <h2 class="mt-[24px] text-[84px] font-bold tracking-[-0.05em] leading-none text-grad inline-block"><span data-count>2.1</span>M+ seguidores</h2>
+        <p class="mt-[28px] text-[44px] font-bold tracking-[-0.06em] leading-none text-[#a0a8a3]">editando juntos desde 2025.</p>
+        <div class="mt-[23px] flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <p class="max-w-[470px] text-[14px] leading-[23px] text-[#888]">Desde julio de 2025 edito el contenido de Manuel de León, empresario y referente en negocios con inteligencia artificial. Videos pensados para retener y educar a una audiencia de más de 2 millones de personas en TikTok, Instagram y YouTube.</p>
+          <div class="flex items-center gap-3 w-[232px] shrink-0 h-[59px] px-4 rounded-xl border-2 border-white/15 bg-[#121a15]/80 shadow-[0_8px_20px_rgba(0,0,0,0.4)]">
+            <span class="w-9 h-9 shrink-0 rounded-full bg-accent flex items-center justify-center text-[11px] font-bold tracking-[-0.02em] text-white">MDL</span>
+            <div class="flex-1 leading-tight">
+              <p class="text-[14px] font-semibold whitespace-nowrap">Manuel de León</p>
+              <p class="text-[12px] text-muted">Negocios e IA</p>
+            </div>
+            <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+          </div>
+        </div>
+        <div class="mt-[35px] grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="h-[91px] rounded-[14px] border-2 border-white/15 bg-gradient-to-br from-[#1c2b22] to-[#18201b] px-5 flex flex-col justify-center">
+            <p class="text-[24px] font-bold leading-none"><span data-count>1.6</span>M</p>
+            <p class="mt-[10px] text-[11px] text-[#888]">Seguidores en TikTok</p>
+          </div>
+          <div class="h-[91px] rounded-[14px] border-2 border-white/15 bg-gradient-to-br from-[#1d241f] to-[#1a1d1b] px-5 flex flex-col justify-center">
+            <p class="text-[24px] font-bold leading-none"><span data-count>522</span>K</p>
+            <p class="mt-[10px] text-[11px] text-[#888]">Seguidores en Instagram</p>
+          </div>
+          <div class="h-[91px] rounded-[14px] border-2 border-white/15 bg-gradient-to-br from-[#1c2b22] to-[#18201b] px-5 flex flex-col justify-center">
+            <p class="text-[24px] font-bold leading-none"><span data-count>37.3</span>M</p>
+            <p class="mt-[10px] text-[11px] text-[#888]">Me gusta en TikTok</p>
+          </div>
+          <div class="h-[91px] rounded-[14px] border-2 border-white/15 bg-gradient-to-br from-[#1d241f] to-[#1a1d1b] px-5 flex flex-col justify-center">
+            <!-- months are recalculated from the start date (14 Jul 2025) on page load -->
+            <p class="text-[24px] font-bold leading-none">+<span data-months-since="2025-07-14" data-count>14</span> <span>meses</span></p>
+            <p class="mt-[10px] text-[11px] text-[#888]">Editando su contenido</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contacto" class="relative bg-black px-4 py-[128px] min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="cta-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-full rounded-full pointer-events-none"></div>
+    <div data-reveal class="relative text-center">
+      <h2 class="text-[85px] font-bold tracking-[-0.05em] leading-[1.0]"><span class="text-white">¿Listo para</span> <span class="text-grad">crecer?</span></h2>
+      <a href="https://x.com/mariopaulovfx" target="_blank" rel="noopener noreferrer" class="mt-[40px] inline-flex items-center h-[56px] px-10 rounded-full text-[16px] font-semibold text-white bg-[#0d4523] border-2 border-[#1a8a45] shadow-[0_0_24px_rgba(34,197,94,0.35)]">Contáctame</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-black border-t border-white/[0.06] px-4">
+    <div class="max-w-6xl mx-auto pt-[67px] pb-[42px]">
+      <div data-reveal class="flex flex-col md:flex-row md:justify-between gap-10">
+        <div class="max-w-xs">
+          <a href="#" class="text-[30px] font-bold tracking-[-0.05em] leading-none"><span class="text-white">MARIO</span> <span class="text-accent">PAULO</span></a>
+          <p class="mt-[14px] text-[14px] leading-[22px] text-[#999]">Editor de vídeo para creadores de contenido y empresarios en Redes Sociales.</p>
+          <a href="mailto:mariopaulomx@outlook.com" class="mt-[8px] block text-[14px] text-[#999]">mariopaulomx@outlook.com</a>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold tracking-[0.15em] text-[#888]">NAVEGACIÓN</p>
+          <ul class="mt-[18px] space-y-[12px] text-[14px] leading-[20px] text-[#999]">
+            <li><a href="#trabajos">Trabajos</a></li>
+            <li><a href="#clientes">Clientes</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold tracking-[0.15em] text-[#888]">REDES</p>
+          <div class="mt-[16px] flex gap-3">
+            <a href="https://www.instagram.com/mariopaulovfx/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-10 h-10 rounded-full border-2 border-white/15 bg-white/5 flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+            <a href="https://x.com/mariopaulovfx" target="_blank" rel="noopener noreferrer" aria-label="X" class="w-10 h-10 rounded-full border-2 border-white/15 bg-white/5 flex items-center justify-center"><svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Duplicate the cards so the carousel loops without a gap.
+    const reelsViewport = document.querySelector('.reels-viewport');
+    const reelsTrack = reelsViewport.querySelector('.reels-track');
+    [...reelsTrack.children].forEach((card) => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      clone.querySelector('.reel').setAttribute('tabindex', '-1');
+      clone.querySelector('video').preload = 'none';
+      reelsTrack.appendChild(clone);
+    });
+
+    // Reels: click toggles play/pause, only one plays at a time, overlay shows while paused.
+    // The carousel stops while hovered or while a video is playing.
+    const reels = [...document.querySelectorAll('.reel')];
+    reels.forEach((box) => {
+      const video = box.querySelector('video');
+      const overlay = box.querySelector('.reel-overlay');
+      const toggle = () => (video.paused ? video.play() : video.pause());
+      box.addEventListener('click', toggle);
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+      video.addEventListener('play', () => {
+        overlay.style.opacity = '0';
+        reelsViewport.classList.add('is-playing');
+        reels.forEach((other) => {
+          const v = other.querySelector('video');
+          if (v !== video && !v.paused) v.pause();
+        });
+      });
+      video.addEventListener('pause', () => {
+        overlay.style.opacity = '';
+        if (reels.every((r) => r.querySelector('video').paused)) reelsViewport.classList.remove('is-playing');
+      });
+      video.addEventListener('ended', () => { video.currentTime = 0; });
+    });
+  </script>
+  <script>
+    // Language toggle (ES ⇄ EN). Spanish is the source text in the HTML; this maps it to English.
+    const EN = {
+      'Trabajos': 'Work',
+      'Clientes': 'Clients',
+      'Contacto': 'Contact',
+      'Tema': 'Theme',
+      'Trabajemos juntos': "Let's work together",
+      'EDITOR DE VÍDEO': 'VIDEO EDITOR',
+      'Trabajando con creadores y empresarios que quieren escalar su contenido orgánico en redes sociales. Más de 5 años en el sector y más de 50M de vistas generadas.': 'Working with creators and entrepreneurs who want to scale their organic content on social media. Over 5 years in the industry and more than 50M views generated.',
+      'Ver trabajos': 'View work',
+      'Trabaja conmigo': 'Work with me',
+      'PORTAFOLIO': 'PORTFOLIO',
+      'Mis mejores vídeos': 'My best videos',
+      'Trabajos reales con los líderes de cada sector. Cada vídeo está pensado para maximizar retención, conectar con la audiencia y hacer crecer el canal.': 'Real work with leaders in every niche. Each video is designed to maximize retention, connect with the audience and grow the channel.',
+      'Reproducir vídeo': 'Play video',
+      'HERRAMIENTAS DE IA': 'AI TOOLS',
+      'EDICIÓN DE VIDEO': 'VIDEO EDITING',
+      'Función Secreta de Gemini': "Gemini's Secret Feature",
+      'Haz videos sin salir en cámara': 'Make Videos Without Being on Camera',
+      '3 Errores Como Editor de Video': '3 Mistakes as a Video Editor',
+      '3 Efectos Premium de Premiere': '3 Premium Effects in Premiere',
+      'Combo de Fragmentos': 'Fragment Combo',
+      'Top 5 Mejores Porteros': 'Top 5 Best Goalkeepers',
+      'CON QUIÉN TRABAJO': 'WHO I WORK WITH',
+      'Trabajo con creadores de contenido y empresarios que quieren llevar su presencia en Redes Sociales al siguiente nivel.': 'I work with content creators and entrepreneurs who want to take their social media presence to the next level.',
+      'ACADEMIA YOUTUBE': 'YOUTUBE ACADEMY',
+      'Academia líder de YouTube en España. Soy mentor dentro de la plataforma, enseñando edición de vídeo a creadores que quieren escalar sus canales.': "Spain's leading YouTube academy. I'm a mentor on the platform, teaching video editing to creators who want to scale their channels.",
+      'LIFESTYLE & ESTILO · YOUTUBE': 'LIFESTYLE & STYLE · YOUTUBE',
+      'Canal de desarrollo personal y estilo enfocado en hombres. Edición orientada a retención y crecimiento de audiencia.': 'Personal development and style channel for men. Editing focused on retention and audience growth.',
+      'Ver canal': 'View channel',
+      'CREADOR DE CONTENIDO': 'CONTENT CREATOR',
+      'Creador de contenido sobre creadores para creadores. Edición enfocada en storytelling y crecimiento orgánico en YouTube.': 'Content creator making content about creators, for creators. Editing focused on storytelling and organic growth on YouTube.',
+      'De 0 a 200K suscriptores en 6 meses. Caso de éxito de crecimiento orgánico gracias a la estrategia de edición.': 'From 0 to 200K subscribers in 6 months. An organic growth success story driven by the editing strategy.',
+      'Creador de contenido con estilo único. Producción cuidada al detalle para transmitir una imagen de marca sólida.': 'Content creator with a unique style. Production crafted down to the detail to convey a solid brand image.',
+      'EMPRESARIO · YOUTUBE': 'ENTREPRENEUR · YOUTUBE',
+      'Colaboración con Miguel Ortiz en varias de sus empresas.': 'Collaboration with Miguel Ortiz across several of his companies.',
+      'CASO DE ÉXITO': 'SUCCESS STORY',
+      'M+ seguidores': 'M+ followers',
+      'editando juntos desde 2025.': 'editing together since 2025.',
+      'Desde julio de 2025 edito el contenido de Manuel de León, empresario y referente en negocios con inteligencia artificial. Videos pensados para retener y educar a una audiencia de más de 2 millones de personas en TikTok, Instagram y YouTube.': 'Since July 2025 I have edited the content of Manuel de León, an entrepreneur and leading voice in AI-powered business. Videos built to retain and educate an audience of more than 2 million people across TikTok, Instagram and YouTube.',
+      'Negocios e IA': 'Business & AI',
+      'Seguidores en TikTok': 'TikTok followers',
+      'Seguidores en Instagram': 'Instagram followers',
+      'Me gusta en TikTok': 'TikTok likes',
+      'meses': 'months',
+      'Editando su contenido': 'Editing his content',
+      '¿Listo para': 'Ready to',
+      'crecer?': 'grow?',
+      'Contáctame': 'Contact me',
+      'Editor de vídeo para creadores de contenido y empresarios en Redes Sociales.': 'Video editor for content creators and entrepreneurs on social media.',
+      'NAVEGACIÓN': 'NAVIGATION',
+      'Cuenta verificada': 'Verified account',
+      'Ver perfil': 'View profile',
+      'AUTOR Y CONFERENCISTA · INSTAGRAM': 'AUTHOR & SPEAKER · INSTAGRAM',
+      'NEGOCIOS E IA · INSTAGRAM': 'BUSINESS & AI · INSTAGRAM',
+      'ESCUELA DE EDICIÓN · SKOOL': 'EDITING SCHOOL · SKOOL',
+      'LIDERAZGO Y FE · INSTAGRAM': 'LEADERSHIP & FAITH · INSTAGRAM',
+      'EMPRESARIO · INSTAGRAM': 'ENTREPRENEUR · INSTAGRAM',
+      'Autor best seller, empresario y conferencista internacional. Creador de la filosofía 1+1=3 y del podcast Sinergéticos.': 'Best-selling author, entrepreneur and international speaker. Creator of the 1+1=3 philosophy and the Sinergéticos podcast.',
+      'Enseña a emprendedores a hacer más dinero y trabajar menos, impulsando sus negocios con inteligencia artificial.': 'Teaches entrepreneurs to make more money and work less by powering their businesses with artificial intelligence.',
+      'Me formé en Prime Editors, una academia privada de editores de alto nivel especializada en trabajar con clientes high ticket.': 'I trained at Prime Editors, a private academy for top-tier editors specialized in working with high-ticket clients.',
+      'Escritor bestseller y educador. Comparte fe, liderazgo e ideas de negocio para crecer sin alejarse de Dios.': 'Best-selling writer and educator. Shares faith, leadership and business ideas to grow without drifting away from God.',
+      'Empresario, papá y esposo que salió de varias quiebras. Hoy ayuda a líderes a tomar decisiones difíciles.': 'Entrepreneur, father and husband who came back from several bankruptcies. Today he helps leaders make tough decisions.',
+      'Fundador de IMECA. Empresario y coach que comparte su historia de reinvención en conferencias, mentorías y entrevistas.': 'Founder of IMECA. Entrepreneur and coach who shares his story of reinvention through talks, mentoring and interviews.',
+      'REDES': 'SOCIAL',
+    };
+
+    // Collect every translatable text node and attribute once, remembering the Spanish original.
+    const i18nEntries = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentElement.closest('script, style, #lang-toggle') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const key = n.nodeValue.trim();
+      if (EN[key]) {
+        const es = n.nodeValue;
+        const en = es.replace(key, EN[key]);
+        i18nEntries.push((lang) => { n.nodeValue = lang === 'en' ? en : es; });
+      }
+    }
+    ['title', 'aria-label', 'alt'].forEach((attr) => {
+      document.querySelectorAll(`body [${attr}]:not(#lang-toggle)`).forEach((el) => {
+        const es = el.getAttribute(attr);
+        if (EN[es]) i18nEntries.push((lang) => el.setAttribute(attr, lang === 'en' ? EN[es] : es));
+      });
+    });
+    const esTitle = document.title;
+
+    const langToggle = document.getElementById('lang-toggle');
+    function setLang(lang) {
+      i18nEntries.forEach((apply) => apply(lang));
+      document.title = lang === 'en' ? (EN[esTitle] || esTitle) : esTitle;
+      document.documentElement.lang = lang;
+      langToggle.textContent = lang === 'en' ? 'Español' : 'English';
+      langToggle.setAttribute('aria-label', lang === 'en' ? 'Cambiar a español' : 'Switch to English');
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+    langToggle.addEventListener('click', () => setLang(document.documentElement.lang === 'en' ? 'es' : 'en'));
+
+    // Section entrance animations: reveal each block once, the first time it scrolls into view.
+    if (document.documentElement.classList.contains('reveal-ready')) {
+      document.querySelectorAll('[data-reveal-stagger]').forEach((grid) => {
+        [...grid.children].forEach((el, i) => {
+          el.setAttribute('data-reveal', '');
+          el.style.setProperty('--reveal-delay', `${(i % 3) * 120}ms`);
+        });
+      });
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('[data-reveal]').forEach((el) => revealObserver.observe(el));
+    }
+
+    // When a button grows on hover, nudge the buttons next to it so they keep their spacing.
+    const HOVER_SCALE = 1.07;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('header button, a.rounded-full').forEach((btn) => {
+        const siblings = [...btn.parentElement.children].filter((el) => el.matches('button, a.rounded-full'));
+        if (siblings.length < 2) return;
+        const i = siblings.indexOf(btn);
+        btn.addEventListener('pointerenter', () => {
+          const push = (btn.offsetWidth * (HOVER_SCALE - 1)) / 2;
+          siblings.forEach((el, j) => {
+            if (j !== i) el.style.translate = `${j < i ? -push : push}px 0`;
+          });
+        });
+        btn.addEventListener('pointerleave', () => siblings.forEach((el) => { el.style.translate = ''; }));
+      });
+    }
+
+    // Hero background video: with reduced motion, keep the still poster instead of playing.
+    const heroBg = document.querySelector('.hero-bg');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { heroBg.removeAttribute('autoplay'); heroBg.pause(); }
+
+    // Success story: months working together, counted from the start date.
+    document.querySelectorAll('[data-months-since]').forEach((el) => {
+      const start = new Date(el.dataset.monthsSince + 'T00:00:00');
+      const now = new Date();
+      let months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+      if (now.getDate() < start.getDate()) months -= 1;
+      el.textContent = Math.max(months, 1);
+    });
+
+    // Count-up ("digital counter") for the success-story numbers, the first time they come into view.
+    // Runs after the month counter above so it counts to the computed value.
+    // The number's box follows the width of the value on screen so the text beside it stays as close as
+    // possible without overlapping: it widens instantly when the number grows, and eases back when it shrinks.
+    const counters = [...document.querySelectorAll('[data-count]')];
+    if (document.documentElement.classList.contains('reveal-ready') && counters.length) {
+      const fmt = (n, decimals) => n.toFixed(decimals);
+      const GAP = 0.03; // hair of breathing room, in em
+      const EASE_BACK_MS = 70;
+      counters.forEach((el) => {
+        const text = el.textContent.trim();
+        const decimals = (text.split('.')[1] || '').length;
+        const steps = Math.round(parseFloat(text) * 10 ** decimals);
+        el.style.display = 'inline-block';
+        el.style.whiteSpace = 'nowrap';
+        // measure every value the counter will show, once, so frames don't trigger layout reads
+        const widths = new Array(steps + 1);
+        for (let k = 0; k <= steps; k++) {
+          el.textContent = fmt(k / 10 ** decimals, decimals);
+          widths[k] = el.getBoundingClientRect().width;
+        }
+        const gapPx = parseFloat(getComputedStyle(el).fontSize) * GAP;
+        let current = widths[0] + gapPx;
+        const setWidth = (w) => {
+          el.style.transition = w > current ? 'none' : `width ${EASE_BACK_MS}ms ease-out`;
+          el.style.width = `${w}px`;
+          current = w;
+        };
+        el.textContent = fmt(0, decimals);
+        el.style.width = `${current}px`;
+        el._count = { text, decimals, steps, widths, gapPx, setWidth };
+      });
+      const countObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          countObserver.unobserve(entry.target);
+          const el = entry.target;
+          const { text, decimals, steps, widths, gapPx, setWidth } = el._count;
+          const duration = 1800;
+          const delay = 250; // let the section's entrance animation start first
+          setTimeout(() => {
+            let start = null;
+            const tick = (now) => {
+              if (start === null) start = now;
+              const t = Math.min((now - start) / duration, 1);
+              const eased = 1 - Math.pow(1 - t, 4); // fast start, smooth landing
+              const k = Math.round(steps * eased);
+              el.textContent = fmt(k / 10 ** decimals, decimals);
+              if (t < 1) { setWidth(widths[k] + gapPx); requestAnimationFrame(tick); return; }
+              // land on the exact value, close the last hair of space, then hand back to normal layout
+              el.textContent = text;
+              setWidth(widths[steps]);
+              setTimeout(() => {
+                el.style.display = el.style.width = el.style.transition = el.style.whiteSpace = '';
+                delete el._count;
+              }, EASE_BACK_MS + 40);
+            };
+            requestAnimationFrame(tick);
+          }, delay);
+        });
+      }, { threshold: 0.5 });
+      counters.forEach((el) => countObserver.observe(el));
+    }
+
+    // Theme toggle: dark (default) ⇄ light.
+    const themeToggle = document.getElementById('theme-toggle');
+    const syncThemeButton = () => themeToggle.setAttribute('aria-pressed', String(document.documentElement.classList.contains('light')));
+    themeToggle.addEventListener('click', () => {
+      const light = document.documentElement.classList.toggle('light');
+      try { localStorage.setItem('theme', light ? 'light' : 'dark'); } catch (e) {}
+      syncThemeButton();
+    });
+    syncThemeButton();
+
+    let savedLang = 'es';
+    try { savedLang = localStorage.getItem('lang') || 'es'; } catch (e) {}
+    if (savedLang === 'en') setLang('en');
+  </script>
+</body>
+</html>
