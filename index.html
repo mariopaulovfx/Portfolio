@@ -95,6 +95,7 @@
       .reels-track .reel-card { flex-basis: calc((100cqw - 72px) / 4); margin-right: 24px; }
     }
     @keyframes reels-scroll { to { transform: translateX(-50%); } }
+    .reels-track .reel-card[data-clone="before"] { display: none; } /* desktop auto-slide only needs the copy after */
     /* Phones and touch screens: no auto-slide; the visitor swipes through the reels (snapping card by card) */
     @media (max-width: 767px), (hover: none) {
       .reels-viewport {
@@ -112,7 +113,7 @@
       .reels-viewport::-webkit-scrollbar { display: none; }
       .reels-track { animation: none; }
       .reels-track .reel-card { scroll-snap-align: start; }
-      .reels-track .reel-card[aria-hidden="true"] { display: none; } /* loop copies aren't needed */
+      .reels-track .reel-card[data-clone="before"] { display: block; } /* lets swiping left loop too */
     }
     /* ---------- Light theme (html.light). Dark stays the default. ----------
        The hero keeps its blue video backdrop; everything below it turns light. */
@@ -521,16 +522,44 @@
   </footer>
 
   <script>
-    // Duplicate the cards so the carousel loops without a gap.
+    // Duplicate the cards so the carousel loops without a gap: one copy after the originals (desktop auto-slide
+    // and phone swiping) and one before them (phones only, so swiping left also loops).
     const reelsViewport = document.querySelector('.reels-viewport');
     const reelsTrack = reelsViewport.querySelector('.reels-track');
-    [...reelsTrack.children].forEach((card) => {
+    const originalCards = [...reelsTrack.children];
+    const makeClone = (card, where) => {
       const clone = card.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
+      clone.dataset.clone = where;
       clone.querySelector('.reel').setAttribute('tabindex', '-1');
       clone.querySelector('video').preload = 'none';
-      reelsTrack.appendChild(clone);
-    });
+      return clone;
+    };
+    originalCards.forEach((card) => reelsTrack.appendChild(makeClone(card, 'after')));
+    originalCards.forEach((card) => reelsTrack.insertBefore(makeClone(card, 'before'), originalCards[0]));
+
+    // Phones / touch: endless manual swiping. The visitor starts on the original set; when a swipe settles
+    // inside one of the copies, we jump by exactly one set's width to the identical spot in the originals.
+    const touchReels = matchMedia('(max-width: 767px), (hover: none)');
+    const reelSetWidth = () => originalCards[0].offsetLeft - reelsTrack.firstElementChild.offsetLeft;
+    const anyReelPlaying = () => [...reelsTrack.querySelectorAll('video')].some((v) => !v.paused);
+    const recenterReels = () => {
+      if (!touchReels.matches || anyReelPlaying()) return;
+      const w = reelSetWidth();
+      if (!w) return;
+      const x = reelsViewport.scrollLeft;
+      if (x < w * 0.5) reelsViewport.scrollLeft = x + w;
+      else if (x >= w * 1.5) reelsViewport.scrollLeft = x - w;
+    };
+    const startReelsAtOriginals = () => { if (touchReels.matches) reelsViewport.scrollLeft = reelSetWidth(); };
+    startReelsAtOriginals();
+    window.addEventListener('load', startReelsAtOriginals);
+    touchReels.addEventListener('change', () => { reelsViewport.scrollLeft = 0; startReelsAtOriginals(); });
+    let reelsScrollTimer;
+    reelsViewport.addEventListener('scroll', () => {
+      clearTimeout(reelsScrollTimer);
+      reelsScrollTimer = setTimeout(recenterReels, 140); // after the swipe (and its snap) has settled
+    }, { passive: true });
 
     // Reels: click toggles play/pause, only one plays at a time, overlay shows while paused.
     // The carousel stops while hovered or while a video is playing.
@@ -553,7 +582,7 @@
       });
       video.addEventListener('pause', () => {
         overlay.style.opacity = '';
-        if (reels.every((r) => r.querySelector('video').paused)) reelsViewport.classList.remove('is-playing');
+        if (reels.every((r) => r.querySelector('video').paused)) { reelsViewport.classList.remove('is-playing'); recenterReels(); }
       });
       video.addEventListener('ended', () => { video.currentTime = 0; });
     });
