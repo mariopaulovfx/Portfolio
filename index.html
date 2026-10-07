@@ -186,6 +186,11 @@
     /* Case-study headline: scales with the space next to it so it stays on one line */
     .case-title { font-size: min(84px, 12vw); }
     @media (min-width: 1024px) { .case-title { font-size: min(84px, (100vw - 476px) * 0.13); } }
+    /* Full-screen reels: show the whole vertical video (no cover-crop), black bars on the sides */
+    .reel video:fullscreen { object-fit: contain; background: #000; }
+    .reel video:-webkit-full-screen { object-fit: contain; background: #000; }
+    .reel video:fullscreen { transition: opacity .4s ease; }
+    .reel video.fs-entering { opacity: 0; }
     .theme-icon-moon { display: none; }
     html.light .theme-icon-sun { display: none; }
     html.light .theme-icon-moon { display: block; }
@@ -265,6 +270,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -281,6 +287,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -297,6 +304,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -313,6 +321,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -329,6 +338,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -345,6 +355,7 @@
                 <div class="absolute inset-0 bg-black/20"></div>
                 <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#22c55e]/70 backdrop-blur flex items-center justify-center"><svg class="w-4 h-4 ml-0.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span>
               </div>
+              <button type="button" class="reel-fs absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/55 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/75 transition" aria-label="Ver en pantalla completa"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3"/></svg></button>
             </div>
             <div class="px-5 pt-[22px] pb-[14px]">
               <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2 text-[10px] leading-none">
@@ -522,6 +533,31 @@
   </footer>
 
   <script>
+    // Full-screen transitions: a black veil fades in before entering and fades out after leaving.
+    const FS_FADE_MS = 260;
+    const fsVeil = document.createElement('div');
+    fsVeil.setAttribute('aria-hidden', 'true');
+    fsVeil.style.cssText = `position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:100;transition:opacity ${FS_FADE_MS}ms ease`;
+    document.body.appendChild(fsVeil);
+
+    // Show native video controls only while a reel is full screen
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach((evt) => document.addEventListener(evt, () => {
+      const fs = document.fullscreenElement || document.webkitFullscreenElement;
+      document.querySelectorAll('.reel video').forEach((v) => { v.controls = v === fs; });
+      if (fs && fs.classList.contains('fs-entering')) {
+        // entered: fade the video in over the black backdrop (veil stays black behind it for the way out)
+        requestAnimationFrame(() => requestAnimationFrame(() => fs.classList.remove('fs-entering')));
+      } else if (!fs) {
+        // left: the page is still behind the black veil — fade it back in
+        fsVeil.style.transition = 'none';
+        fsVeil.style.opacity = '1';
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          fsVeil.style.transition = `opacity ${FS_FADE_MS * 1.6}ms ease`;
+          fsVeil.style.opacity = '0';
+        }));
+      }
+    }));
+
     // Duplicate the cards so the carousel loops without a gap: one copy after the originals (desktop auto-slide
     // and phone swiping) and one before them (phones only, so swiping left also loops).
     const reelsViewport = document.querySelector('.reels-viewport');
@@ -568,7 +604,32 @@
       const video = box.querySelector('video');
       const overlay = box.querySelector('.reel-overlay');
       const toggle = () => (video.paused ? video.play() : video.pause());
-      box.addEventListener('click', toggle);
+      box.addEventListener('click', () => {
+        // In full screen the native controls handle play/pause; don't toggle again from the card
+        if (document.fullscreenElement || document.webkitFullscreenElement || video.controls) return;
+        toggle();
+      });
+      // Full screen: plays the reel and opens it full screen (iPhone uses its native video player)
+      const fsBtn = box.querySelector('.reel-fs');
+      fsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        video.play().catch(() => {});
+        const request = video.requestFullscreen ? () => video.requestFullscreen()
+          : video.webkitRequestFullscreen ? () => video.webkitRequestFullscreen() : null;
+        // iPhone: its native player has its own open/close animation, so open it right away
+        if (!request) { if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); return; }
+        // fade to black, then open full screen; the video itself fades in once it's there
+        fsVeil.style.opacity = '1';
+        video.classList.add('fs-entering');
+        setTimeout(() => {
+          Promise.resolve(request()).catch(() => {
+            video.classList.remove('fs-entering');
+            fsVeil.style.opacity = '0';
+            if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+          });
+        }, FS_FADE_MS);
+      });
+      fsBtn.addEventListener('keydown', (e) => e.stopPropagation());
       box.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
       });
@@ -603,6 +664,7 @@
       'Mis mejores vídeos': 'My best videos',
       'Trabajos reales con los líderes de cada sector. Cada vídeo está pensado para maximizar retención, conectar con la audiencia y hacer crecer el canal.': 'Real work with leaders in every niche. Each video is designed to maximize retention, connect with the audience and grow the channel.',
       'Reproducir vídeo': 'Play video',
+      'Ver en pantalla completa': 'View full screen',
       'HERRAMIENTAS DE IA': 'AI TOOLS',
       'EDICIÓN DE VIDEO': 'VIDEO EDITING',
       'Función Secreta de Gemini': "Gemini's Secret Feature",
